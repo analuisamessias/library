@@ -13,7 +13,7 @@ class Book:
             return NewReleasePrice()
         elif price_code == Book.CHILDREN:
             return ChildrenPrice()
-        return RegulaPrice()
+        return RegularPrice()      # corrigido nome da classe
     
     def get_charge(self, days_rented: int):
         return self.price.get_charge(days_rented)
@@ -34,7 +34,6 @@ class Rental:
     def get_frequent_renter_points(self) -> int:
         return self.book.get_frequent_renter_points(self.days_rented)
 
-    
 
 
 class Client:
@@ -46,20 +45,6 @@ class Client:
     def add_rental(self, rental: Rental):
         self._rentals.append(rental)
 
-    def get_charge(self, rental: Rental) -> float:
-        amount = 0
-        if rental.book.price_code == Book.REGULAR:
-            amount += 2
-            if rental.days_rented > 2:
-                amount += (rental.days_rented - 2) * 1.5
-        elif rental.book.price_code == Book.NEW_RELEASE:
-            amount += rental.days_rented * 3
-        elif rental.book.price_code == Book.CHILDREN:
-            amount += 1.5
-            if rental.days_rented > 3:
-                amount += (rental.days_rented - 3) * 1.5
-        return amount
-
     def statement(self) -> str:
 
         total_amount = 0
@@ -67,30 +52,12 @@ class Client:
         result = f"Rental summary for {self.name}\n"
         
         for rental in self._rentals:
-            amount = 0
-            
-            # determine amounts for each line
-            if rental.book.price_code == Book.REGULAR:
-                amount += 2
-                if rental.days_rented > 2:
-                    amount += (rental.days_rented - 2) * 1.5
-            elif rental.book.price_code == Book.NEW_RELEASE:
-                amount += rental.days_rented * 3
-            elif rental.book.price_code == Book.CHILDREN:
-                amount += 1.5
-                if rental.days_rented > 3:
-                    amount += (rental.days_rented - 3) * 1.5
+            amount = rental.get_charge()
+            frequent_renter_points += rental.get_frequent_renter_points()
 
-            # add frequent renter points
-            frequent_renter_points += 1
-            if rental.book.price_code == Book.NEW_RELEASE and rental.days_rented > 1:
-                frequent_renter_points += 1
-
-            # show each rental result
             result += f"- {rental.book.title}: {amount}\n"
             total_amount += amount
         
-        # show total result
         result += f"Total: {total_amount}\n"
         result += f"Points: {frequent_renter_points}"
         return result
@@ -99,17 +66,40 @@ class Client:
 class Price:
 
     def get_charge(self, days_rented: int) -> float:
-        pass
+        raise NotImplementedError()
 
     def get_frequent_renter_points(self, days_rented: int) -> int:
-        pass
+        return 1
 
 
-class RegulaPrice(Price):
-    pass
+class RegularPrice(Price):
+    def get_charge(self, days_rented: int) -> float:
+        amount = 2
+        if days_rented > 2:
+            amount += (days_rented - 2) * 1.5
+        return amount
+
+    def get_frequent_renter_points(self, days_rented: int) -> int:
+        return 1
+
 
 class NewReleasePrice(Price):
-    pass
+    def get_charge(self, days_rented: int) -> float:
+        return days_rented * 3
+    
+    def get_frequent_renter_points(self, days_rented: int) -> int:
+        points = 1
+        if days_rented > 1:
+            points += 1
+        return points
+
 
 class ChildrenPrice(Price):
-    pass
+    def get_charge(self, days_rented: int) -> float:
+        amount = 1.5
+        if days_rented > 3:
+            amount += (days_rented - 3) * 1.5
+        return amount
+
+    def get_frequent_renter_points(self, days_rented: int) -> int:
+        return 1
