@@ -27,6 +27,12 @@ class Rental:
             if self.days_rented > 3:
                 amount += (self.days_rented - 3) * 1.5
         return amount
+    
+    def get_frequent_renter_points(self) -> int:
+        points = 1
+        if self.book.price_code == Book.NEW_RELEASE and self.days_rented > 1:
+            points += 1
+        return points
 
     
 
