@@ -7,12 +7,6 @@ class Book:
     def __init__(self, title: str, price_code: int):
         self.title = title
         self.price_code = price_code
-
-
-class Rental:
-    def __init__(self, book: Book, days_rented: int):
-        self.book = book
-        self.days_rented = days_rented
     
     def get_charge(self) -> float:
         amount = 0
@@ -27,6 +21,16 @@ class Rental:
             if self.days_rented > 3:
                 amount += (self.days_rented - 3) * 1.5
         return amount
+    
+
+
+class Rental:
+    def __init__(self, book: Book, days_rented: int):
+        self.book = book
+        self.days_rented = days_rented
+    
+    def get_charge(self) -> float:                
+        return self.book.get_charge(self.days_rented)
     
     def get_frequent_renter_points(self) -> int:
         points = 1
